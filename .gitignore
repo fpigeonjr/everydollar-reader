@@ -1,0 +1,25 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Personal financial data must never be committed.
+data/
+imports/
+snapshots/
+*.csv
+*.db
+*.sqlite
+*.sqlite3
+
+# Synthetic, privacy-reviewed test fixtures are allowed.
+!tests/fixtures/**/*.csv
+
+# Common local build and test artifacts.
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+coverage/
+dist/
+build/

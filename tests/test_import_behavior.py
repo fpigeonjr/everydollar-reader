@@ -217,6 +217,69 @@ def test_bad_month_flag_fails_without_writing(
     assert not any(data_dir.glob("*.json"))
 
 
+def test_budget_row_missing_amount_fails_cleanly(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """``csv.DictReader`` yields ``None`` for blank fields; this must surface as
+    a clean SnapshotImportError, never a ``TypeError`` from ``re.match``.
+    """
+    data_dir = tmp_path / "data"
+    budget = tmp_path / "budget.csv"
+    # Spent is blank (missing field) — DictReader stores None.
+    budget.write_text(
+        "\ufeffGroup,Item,Planned,Spent,Remaining\n"
+        "Food,Groceries,500.00,,29.23\n",
+        encoding="utf-8",
+    )
+    tx = _copy_fixture(TXNS_07, tmp_path / "07-2026-EveryDollar-Transactions.csv")
+
+    code = _run_import(data_dir, "2026-07", budget, tx)
+
+    assert code != 0
+    err = capsys.readouterr().err
+    assert "Spent" in err
+    assert not _snapshot_path(data_dir, "2026-07").is_file()
+
+
+def test_row_with_extra_columns_fails_without_writing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A row longer than the header (DictReader ``None`` restkey) must be
+    rejected so extra data is never silently serialized.
+    """
+    data_dir = tmp_path / "data"
+    budget = tmp_path / "budget.csv"
+    budget.write_text(
+        "\ufeffGroup,Item,Planned,Spent,Remaining\n"
+        "Food,Groceries,500.00,-4.70,29.23,unexpected-extra\n",
+        encoding="utf-8",
+    )
+    tx = _copy_fixture(TXNS_07, tmp_path / "07-2026-EveryDollar-Transactions.csv")
+
+    code = _run_import(data_dir, "2026-07", budget, tx)
+
+    assert code != 0
+    err = capsys.readouterr().err
+    assert "more columns" in err
+    assert not any(data_dir.glob("*.json"))
+
+
+def test_store_snapshot_rejects_untrusted_month(tmp_path: Path) -> None:
+    from everydollar_reader.snapshot import SnapshotImportError, store_snapshot
+
+    malicious = {
+        "schema_version": 1,
+        "month": "../../../../tmp/ed-traversal",
+        "snapshot_time": "2026-07-26T17:30:00-04:00",
+        "budget": {"headers": [], "rows": []},
+        "transactions": {"headers": [], "rows": []},
+    }
+    with pytest.raises(SnapshotImportError):
+        store_snapshot(tmp_path, malicious)
+    assert not (Path("/tmp/ed-traversal.json")).exists()
+    assert list(tmp_path.glob("*.json")) == []
+
+
 def _run_import(
     data_dir: Path, month: str, budget: Path, transactions: Path
 ) -> int:

@@ -84,6 +84,22 @@ def _load_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     return list(headers), rows
 
 
+def _row_value(row: dict[str, Any], col: str) -> str:
+    """Return a cell as a string, treating ``csv.DictReader``'s ``None``
+    (missing or blank field) as the empty string so regex checks raise a
+    clear ``SnapshotImportError`` instead of ``TypeError``."""
+    return row.get(col) or ""
+
+
+def _reject_extra_columns(row: dict[str, Any], kind: str) -> None:
+    """``csv.DictReader`` stores fields beyond the header row under a ``None``
+    key. Reject them so extra data is never silently serialized."""
+    if None in row:
+        raise SnapshotImportError(
+            f"{kind} row has more columns than its header"
+        )
+
+
 def _validate_budget(headers: list[str], rows: list[dict[str, str]]) -> None:
     if headers != BUDGET_HEADERS:
         raise SnapshotImportError(
@@ -91,8 +107,9 @@ def _validate_budget(headers: list[str], rows: list[dict[str, str]]) -> None:
             f"{','.join(BUDGET_HEADERS)}; got {','.join(headers) or '<empty>'}"
         )
     for row in rows:
+        _reject_extra_columns(row, "Budget Export")
         for col in ("Planned", "Spent", "Remaining"):
-            if not _AMOUNT_RE.match(row.get(col, "")):
+            if not _AMOUNT_RE.match(_row_value(row, col)):
                 raise SnapshotImportError(
                     f"Budget Export row has invalid {col}: must be a plain "
                     "two-decimal amount (e.g. -12.34)"
@@ -109,11 +126,12 @@ def _validate_transactions(
             f"got {','.join(headers) or '<empty>'}"
         )
     for row in rows:
-        if not _DATE_RE.match(row.get("Date", "")):
+        _reject_extra_columns(row, "Transaction Export")
+        if not _DATE_RE.match(_row_value(row, "Date")):
             raise SnapshotImportError(
                 "Transaction Export row has invalid Date: expected MM/DD/YYYY"
             )
-        if not _AMOUNT_RE.match(row.get("Amount", "")):
+        if not _AMOUNT_RE.match(_row_value(row, "Amount")):
             raise SnapshotImportError(
                 "Transaction Export row has invalid Amount: must be a plain "
                 "two-decimal amount (e.g. -12.34)"
@@ -159,11 +177,17 @@ def build_snapshot(
 
 def store_snapshot(data_dir: Path, snapshot: dict[str, Any]) -> Path:
     """Write a Budget Snapshot to ``<data_dir>/<month>.json``, replacing any
-    existing snapshot for that month. Validates-then-writes via a temp file
-    + atomic replace so a partial snapshot is never left on disk."""
+    existing snapshot for that month.
+
+    ``snapshot`` is assumed to have been built (and validated) by
+    :func:`build_snapshot`. As a path-traversal guard, ``month`` is re-validated
+    here before it is used in a filename. Writes via a temp file + atomic
+    replace so a partial snapshot is never left on disk."""
+    month = snapshot["month"]
+    _validate_month(month)
     data_dir.mkdir(parents=True, exist_ok=True)
-    target = data_dir / f"{snapshot['month']}.json"
-    tmp = data_dir / f".{snapshot['month']}.json.tmp"
+    target = data_dir / f"{month}.json"
+    tmp = data_dir / f".{month}.json.tmp"
     tmp.write_text(json.dumps(snapshot, ensure_ascii=False), encoding="utf-8")
     tmp.replace(target)
     return target

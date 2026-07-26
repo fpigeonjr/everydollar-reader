@@ -9,13 +9,12 @@ parser must tolerate, so fixture drift fails loudly.
 from __future__ import annotations
 
 import csv
-import io
 import re
-
-import pytest
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
+
+import pytest
 
 FIXTURES = Path(__file__).parent / "fixtures"
 BUDGET_07 = FIXTURES / "07-2026-EveryDollar-BudgetItems.csv"

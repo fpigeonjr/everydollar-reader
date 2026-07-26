@@ -31,9 +31,10 @@ financial information.
 
 ## Public-release status
 
-This repository is local-only and has no GitHub remote. A public release may be
-considered after the export schemas are understood, synthetic fixtures cover
-them, and privacy checks pass. The public project name is not final.
+The scaffold is public at
+[github.com/fpigeonjr/everydollar-reader](https://github.com/fpigeonjr/everydollar-reader).
+A usable public release still waits on export-schema discovery, synthetic
+fixtures, and privacy checks. The public project name is not final.
 
 EveryDollar is a trademark of Ramsey Solutions. This project is unofficial and
 is not affiliated with or endorsed by Ramsey Solutions.

@@ -1,6 +1,6 @@
 # Discovery Scope
 
-Status: repository scaffold; schema discovery pending.
+Status: public scaffold; CLI-first design resolved; schema discovery pending.
 
 ## Goal
 
@@ -38,6 +38,7 @@ Every answer based on a snapshot must expose or account for its freshness.
 | First-cut non-goals | Transaction listing, cross-month compare, anomaly detection |
 | On-disk location | XDG data home: `~/.local/share/everydollar-reader/` for exports cache and derived state |
 | Snapshot Time source | Wall-clock import time when the CLI successfully accepts a month's export pair |
+| Public / package name | Keep `everydollar-reader` for now; revisit only if trademark risk becomes concrete |
 | Public release | Scaffold is public; usable release deferred until synthetic fixtures and privacy checks exist |
 
 ## Explicit non-goals
@@ -87,4 +88,6 @@ Later cuts may add recent transactions, cross-month compare, and unusual-spendin
 ## Open design questions
 
 - What normalized model faithfully represents the observed export schemas?
-- What brand-neutral name should be used if the project becomes public?
+  (Blocked on representative same-month Budget Export + Transaction Export
+  inspection; real rows must not become fixtures.)
+- Implementation language and packaging for the CLI binary.

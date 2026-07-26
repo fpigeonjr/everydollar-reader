@@ -35,7 +35,8 @@ financial information.
 The scaffold is public at
 [github.com/fpigeonjr/everydollar-reader](https://github.com/fpigeonjr/everydollar-reader).
 A usable public release still waits on export-schema discovery, synthetic
-fixtures, and privacy checks. The public project name is not final.
+fixtures, and privacy checks. The project name remains `everydollar-reader`
+for now.
 
 EveryDollar is a trademark of Ramsey Solutions. This project is unofficial and
 is not affiliated with or endorsed by Ramsey Solutions.

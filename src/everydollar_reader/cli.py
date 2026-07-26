@@ -17,7 +17,7 @@ from everydollar_reader.snapshots import (
     ItemRow,
     Snapshot,
     latest_month,
-    load_snapshot,
+    load_snapshot_or_warn,
     load_snapshots,
 )
 
@@ -158,8 +158,13 @@ def cmd_item(args: argparse.Namespace) -> int:
         print("No budget snapshots imported yet.")
         return 0
 
-    snapshot = load_snapshot(data_dir, month)
+    snapshot, warning = load_snapshot_or_warn(data_dir, month)
     if snapshot is None:
+        if warning is not None:
+            # Corrupt cache: surface the read failure without crashing,
+            # mirroring ``status``. The cache is disposable.
+            print(f"warning: {warning}")
+            return 0
         refs, _ = load_snapshots(data_dir)
         available = ", ".join(s.month for s in refs) or "none"
         print(f"No snapshot for {month}. Available month(s): {available}.")

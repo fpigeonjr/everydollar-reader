@@ -145,30 +145,55 @@ def _budget_rows(payload: dict[str, object]) -> list[dict[str, str]]:
     return [row for row in rows if isinstance(row, dict)]
 
 
+def _str(value: object) -> str:
+    """Return ``value`` as a string, treating ``None`` (a JSON ``null``) as empty.
+
+    ``str(None)`` would otherwise render the literal ``"None"``, which can
+    leak into CLI output and make a malformed snapshot look valid.
+    """
+    return "" if value is None else str(value)
+
+
 def load_snapshot(data_dir: Path, month: str) -> Snapshot | None:
     """Return the stored snapshot for ``month``, or ``None`` if absent.
 
     Raises only on filesystem/JSON errors that make the file unreadable; a
-    snapshot missing its ``items`` is returned with an empty item list so
-    callers can distinguish "no snapshot" from "empty snapshot".
+    snapshot missing its ``budget.rows`` is returned with an empty item list
+    so callers can distinguish "no snapshot" from "snapshot with no budget
+    rows".
     """
     path = data_dir / f"{month}.json"
     if not path.is_file():
         return None
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    snap_month = str(payload.get("month") or month)
-    snapshot_time = str(payload.get("snapshot_time", ""))
+    payload = json.loads(path.read_text(encoding="utf-8"))  # may raise
+    snap_month = _str(payload.get("month") or month)
+    snapshot_time = _str(payload.get("snapshot_time") or "")
     items = [
         ItemRow(
-            group=str(row.get(_BUDGET_COL["group"], "")),
-            item=str(row.get(_BUDGET_COL["item"], "")),
-            planned=str(row.get(_BUDGET_COL["planned"], "")),
-            spent=str(row.get(_BUDGET_COL["spent"], "")),
-            remaining=str(row.get(_BUDGET_COL["remaining"], "")),
+            group=_str(row.get(_BUDGET_COL["group"])),
+            item=_str(row.get(_BUDGET_COL["item"])),
+            planned=_str(row.get(_BUDGET_COL["planned"])),
+            spent=_str(row.get(_BUDGET_COL["spent"])),
+            remaining=_str(row.get(_BUDGET_COL["remaining"])),
         )
         for row in _budget_rows(payload)
     ]
     return Snapshot(month=snap_month, snapshot_time=snapshot_time, items=items)
+
+
+def load_snapshot_or_warn(
+    data_dir: Path, month: str
+) -> tuple[Snapshot | None, str | None]:
+    """Like :func:`load_snapshot` but never raises.
+
+    Returns ``(snapshot, warning)``. A missing file is ``(None, None)``; an
+    unreadable file is ``(None, <human-readable warning>)`` so callers can
+    surface corruption without crashing, mirroring :func:`load_snapshots`.
+    """
+    try:
+        return load_snapshot(data_dir, month), None
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, f"{month}.json: unreadable ({exc.__class__.__name__})"
 
 
 def latest_month(data_dir: Path) -> str | None:

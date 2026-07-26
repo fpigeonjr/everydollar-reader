@@ -8,7 +8,7 @@ the exact on-disk shape that ``import`` writes. No real financial data is used.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -209,3 +209,22 @@ def test_item_output_identifies_snapshot_time_and_point_in_time_disclaimer(
     # The point-in-time disclaimer is surfaced on every snapshot-based answer.
     assert "point-in-time" in out
     assert "EveryDollar may have changed since" in out
+
+
+def test_item_unreadable_snapshot_surfaces_warning_without_crashing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    # A <YYYY-MM>.json file the reader recognizes as a snapshot but cannot
+    # parse, mirroring the corrupt-cache shape status already tolerates.
+    (data_dir / "2026-07.json").write_text("{not json", encoding="utf-8")
+
+    code = main(["--data-dir", str(data_dir), "item", "Restaurants", "--month", "2026-07"])
+
+    # The cache is disposable: a corrupt snapshot surfaces a warning rather
+    # than crashing the CLI, and no row is fabricated.
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "2026-07" in out  # the offending month is named
+    assert "Planned:" not in out

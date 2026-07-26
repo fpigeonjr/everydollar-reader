@@ -124,11 +124,9 @@ Later cuts may add recent transactions, cross-month compare, and unusual-spendin
 
 ## Open design questions
 
-- What normalized model faithfully represents the observed export schemas?
-  (Unblocked; candidate: mirror the export rows faithfully per budget month
-  rather than inventing entities — store Remaining verbatim, transactions as
-  rows without synthesized IDs.)
-- Can past months' Budget Exports still be downloaded? Transaction-only
-  exports exist for 2026-04 through 2026-06, but a Budget Snapshot is defined
-  as requiring both exports. If past Budget Exports are unavailable, either
-  history starts at 2026-07 or transaction-only months need a defined status.
+- Normalized model: resolved — mirror the export rows faithfully per budget
+  month as per-month JSON under the data home; store `Remaining` verbatim;
+  transactions are rows without synthesized IDs (see issue #4).
+- Can past months' Budget Exports still be downloaded? Tracked as issue #7.
+  Transaction-only exports exist for 2026-04 through 2026-06, but a Budget
+  Snapshot is defined as requiring both exports.

@@ -38,8 +38,8 @@ A named planning and tracking line within a Budget Group.
 _Avoid_: Category, transaction
 
 **Snapshot Time**:
-The time at which the user downloaded the exports represented by a Budget Snapshot.
-_Avoid_: Transaction date, import time
+The wall-clock time at which the Budget Reader CLI successfully imported the export pair for a Budget Snapshot.
+_Avoid_: Transaction date, download time, file mtime
 
 **Accountant**:
 The Hermes Area Agent that may inspect raw Budget Snapshots and answer finance questions for Frank.
@@ -71,3 +71,4 @@ _Avoid_: MCP server, API service, EveryDollar client
 - "category" can mean either a **Budget Group** or **Budget Item**; resolved: use the more precise EveryDollar term.
 - "remaining" may mean arithmetic planned-minus-spent or EveryDollar's safe-to-spend presentation; unresolved until representative Budget Export schemas are inspected.
 - Re-importing a month could mean versioning or replacement; resolved: replacement only, with **Snapshot Time** advancing.
+- **Snapshot Time** could mean download time or file mtime; resolved: successful CLI import time.

@@ -37,6 +37,7 @@ Every answer based on a snapshot must expose or account for its freshness.
 | First CLI cut | `import`, `status`, and Budget Item planned/spent/remaining |
 | First-cut non-goals | Transaction listing, cross-month compare, anomaly detection |
 | On-disk location | XDG data home: `~/.local/share/everydollar-reader/` for exports cache and derived state |
+| Snapshot Time source | Wall-clock import time when the CLI successfully accepts a month's export pair |
 | Public release | Scaffold is public; usable release deferred until synthetic fixtures and privacy checks exist |
 
 ## Explicit non-goals
@@ -86,5 +87,4 @@ Later cuts may add recent transactions, cross-month compare, and unusual-spendin
 ## Open design questions
 
 - What normalized model faithfully represents the observed export schemas?
-- How is Snapshot Time established on import (export metadata, file mtime, or import time)?
 - What brand-neutral name should be used if the project becomes public?

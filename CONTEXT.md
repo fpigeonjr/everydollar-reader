@@ -53,6 +53,7 @@ _Avoid_: MCP server, API service, EveryDollar client
 
 - An **EveryDollar Budget** is the authority for exactly one budget month
 - A **Budget Snapshot** represents exactly one **EveryDollar Budget** at one **Snapshot Time**
+- At most one **Budget Snapshot** is retained per budget month; a later import replaces it
 - A **Budget Snapshot** contains exactly one **Budget Export** and one **Transaction Export**
 - A **Budget Group** contains one or more **Budget Items**
 - A **Tracked Transaction** belongs to one budget month and is assigned to one or more **Budget Items**
@@ -69,3 +70,4 @@ _Avoid_: MCP server, API service, EveryDollar client
 - "snapshot" was used for a transaction CSV alone; resolved: a **Budget Snapshot** requires both the month's **Budget Export** and **Transaction Export**.
 - "category" can mean either a **Budget Group** or **Budget Item**; resolved: use the more precise EveryDollar term.
 - "remaining" may mean arithmetic planned-minus-spent or EveryDollar's safe-to-spend presentation; unresolved until representative Budget Export schemas are inspected.
+- Re-importing a month could mean versioning or replacement; resolved: replacement only, with **Snapshot Time** advancing.

@@ -32,6 +32,8 @@ Every answer based on a snapshot must expose or account for its freshness.
 | Isolation strength | Operational profile/tool isolation; no separate OS identity |
 | Local interface | CLI-first; Hermes Accountant shells out to the CLI |
 | MCP surface | Deferred; not required for the first Accountant integration |
+| Revised-month import | Replace the existing snapshot for that month; Snapshot Time advances |
+| Snapshot history | No per-month version history; local state remains a disposable cache |
 | Public release | Scaffold is public; usable release deferred until synthetic fixtures and privacy checks exist |
 
 ## Explicit non-goals
@@ -70,6 +72,5 @@ synthetic fixtures will be authored.
 ## Open design questions
 
 - What normalized model faithfully represents the observed export schemas?
-- How should repeated imports of a revised month replace or version a snapshot?
 - Which deterministic CLI commands and queries belong in the first cut?
 - What brand-neutral name should be used if the project becomes public?

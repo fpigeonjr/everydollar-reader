@@ -1,0 +1,13 @@
+﻿Group,Item,Type,Date,Merchant,Amount,Note
+Income,Salary,income,05/01/2026,Acme Payroll,4200.00,
+Giving,Charity,expense,05/06/2026,Helping Hands Org,-100.00,
+Housing,Rent,expense,05/01/2026,Maple Property Group,-1450.00,
+Food,Groceries,expense,05/02/2026,Corner Market,-88.40,
+Food,Groceries,expense,05/09/2026,Corner Market,-104.35,
+Food,Groceries,expense,05/16/2026,Corner Market,-95.80,Guests visiting
+Food,Groceries,expense,05/23/2026,Corner Market,-110.00,
+Food,Coffee Shops,expense,05/04/2026,Roast & Toast Cafe,-7.25,
+Food,Coffee Shops,expense,05/18/2026,Roast & Toast Cafe,-8.75,
+Food,Coffee Shops,expense,05/27/2026,Roast & Toast Cafe,-6.50,
+Savings,Emergency Fund,fund,05/03/2026,First Bank Transfer,-100.00,
+Debt,Student Loan,debt,05/21/2026,Edloan Services,-220.00,

@@ -81,12 +81,15 @@ thousands separators, two decimal places, leading `-` for negatives.
 - One row per Budget Item; Item names are unique within the month.
 - Zero-value rows exist in all three amount columns; zero-activity items are
   still exported.
-- `Spent` and `Remaining` can be negative (credits/overspend); `Planned` was
-  not observed negative.
+- `Planned` was not observed negative. `Spent` is negative for ordinary
+  spending (signed convention, like the transaction rows) and positive for
+  net-credit items (refunds exceed spending). `Remaining` is negative when
+  overspent.
 - `Spent` equals the signed sum of ALL tracked transactions for the item
   (verified 63/63 rows on the sample month).
-- `Remaining` is NOT `Planned - Spent` (only 24/63 rows match). It is an
-  EveryDollar-computed column whose carryover semantics are not derivable
+- `Remaining` equals `Planned + Spent` (signed) for non-carryover items
+  (48/63 rows on the sample month). The rest are fund-style items whose
+  Remaining includes a balance carried from earlier months, not derivable
   from a single month's exports. Store verbatim; never derive it.
 
 **Transaction Export** — two observed header versions

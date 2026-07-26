@@ -101,11 +101,13 @@ def test_import_maltered_headers_fail_without_writing(
     assert not (data_dir / "2026-07.json").is_file()
 
 
-def test_item_schema_gate(
+def test_item_no_snapshots_reports_empty_not_gated(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    # ``item`` no longer emits the schema-discovery gate; with no snapshots
+    # it reports the empty cache readably (exit 0) rather than erroring.
     code = main(["--data-dir", str(tmp_path), "item", "Dining"])
-    assert code == 1
-    err = capsys.readouterr().err
-    assert "Dining" in err
-    assert "schema discovery" in err
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "No budget snapshots imported yet." in out
+    assert "schema discovery" not in out

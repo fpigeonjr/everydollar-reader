@@ -13,11 +13,12 @@ from everydollar_reader.snapshot import (
     build_snapshot,
     store_snapshot,
 )
-from everydollar_reader.snapshots import load_snapshots
-
-_SCHEMA_GATE = (
-    "not implemented: parser work waits on same-month export schema discovery "
-    "and synthetic fixtures (see docs/scope.md and GitHub issues #2–#3)"
+from everydollar_reader.snapshots import (
+    ItemRow,
+    Snapshot,
+    latest_month,
+    load_snapshot,
+    load_snapshots,
 )
 
 
@@ -137,17 +138,51 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def _find_item(snapshot: Snapshot, name: str) -> ItemRow | None:
+    """Case-insensitive exact match on Budget Item name within a snapshot."""
+    target = name.casefold()
+    for row in snapshot.items:
+        if row.item.casefold() == target:
+            return row
+    return None
+
+
 def cmd_item(args: argparse.Namespace) -> int:
     data_dir = _resolve_data_dir(args)
-    month = args.month or "latest"
-    print(
-        f"data-dir: {data_dir}\n"
-        f"item: {args.name}\n"
-        f"month: {month}\n"
-        f"error: {_SCHEMA_GATE}",
-        file=sys.stderr,
-    )
-    return 1
+
+    if args.month:
+        month = args.month
+    else:
+        month = latest_month(data_dir) or ""
+    if not month:
+        print("No budget snapshots imported yet.")
+        return 0
+
+    snapshot = load_snapshot(data_dir, month)
+    if snapshot is None:
+        refs, _ = load_snapshots(data_dir)
+        available = ", ".join(s.month for s in refs) or "none"
+        print(f"No snapshot for {month}. Available month(s): {available}.")
+        return 0
+
+    row = _find_item(snapshot, args.name)
+    if row is None:
+        print(
+            f"No Budget Item named {args.name!r} in {month}. Available item(s):"
+        )
+        for entry in snapshot.items:
+            print(f"  {entry.item}")
+        return 1
+
+    print(f"Budget Item: {row.item}")
+    print(f"Group: {row.group}")
+    print(f"Planned: {row.planned}")
+    print(f"Spent: {row.spent}")
+    print(f"Remaining: {row.remaining}")
+    print(f"Month: {snapshot.month}")
+    print(f"Snapshot Time: {snapshot.display_time()}")
+    print("Snapshots are point-in-time; EveryDollar may have changed since.")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:

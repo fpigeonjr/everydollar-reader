@@ -69,6 +69,6 @@ _Avoid_: MCP server, API service, EveryDollar client
 - "API access" originally meant direct access to EveryDollar; resolved: the **Budget Reader** reads explicit exports and does not access EveryDollar directly.
 - "snapshot" was used for a transaction CSV alone; resolved: a **Budget Snapshot** requires both the month's **Budget Export** and **Transaction Export**.
 - "category" can mean either a **Budget Group** or **Budget Item**; resolved: use the more precise EveryDollar term.
-- "remaining" may mean arithmetic planned-minus-spent or EveryDollar's safe-to-spend presentation; unresolved until representative Budget Export schemas are inspected.
+- "remaining" may mean arithmetic planned-minus-spent or EveryDollar's safe-to-spend presentation; resolved: the Budget Export carries its own `Remaining` column that is NOT planned-minus-spent (carryover semantics). The reader stores and reports it verbatim and never derives it.
 - Re-importing a month could mean versioning or replacement; resolved: replacement only, with **Snapshot Time** advancing.
 - **Snapshot Time** could mean download time or file mtime; resolved: successful CLI import time.

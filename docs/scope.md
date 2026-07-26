@@ -1,6 +1,7 @@
 # Discovery Scope
 
-Status: Python CLI skeleton runnable; schema discovery pending before parsers.
+Status: schema discovery complete for the observed sample (2026-07-26);
+synthetic fixtures and parser implementation unblocked.
 
 ## Goal
 
@@ -64,17 +65,52 @@ Every answer based on a snapshot must expose or account for its freshness.
 
 ## Schema-discovery gate
 
-Parser implementation begins only after representative exports from the same
-month are available for local inspection. Inspection must establish:
+Passed 2026-07-26 via structural-only inspection of one same-month export
+pair (2026-07) plus four transaction-only exports (2026-04 through 2026-07).
+No real rows became fixtures; no merchants, amounts, dates, account names, or
+group/item names were recorded. Findings below are schema-level only.
 
-- Exact headers, encodings, numeric formats, and date formats
-- How planned, spent, and remaining values are represented
-- How income, expenses, funds, goals, and zero-value items appear
-- Whether split transactions have stable identities
-- How empty exports, duplicated downloads, and revised snapshots behave
+### Discovered export schema
 
-Real rows will not become fixtures. Once the shapes are understood, equivalent
-synthetic fixtures will be authored.
+Both file kinds: UTF-8 with BOM (`utf-8-sig`), LF line endings, header row,
+no trailing metadata. Amounts are plain decimals: no currency symbol, no
+thousands separators, two decimal places, leading `-` for negatives.
+
+**Budget Export** — `Group, Item, Planned, Spent, Remaining`
+
+- One row per Budget Item; Item names are unique within the month.
+- Zero-value rows exist in all three amount columns; zero-activity items are
+  still exported.
+- `Spent` and `Remaining` can be negative (credits/overspend); `Planned` was
+  not observed negative.
+- `Spent` equals the signed sum of ALL tracked transactions for the item
+  (verified 63/63 rows on the sample month).
+- `Remaining` is NOT `Planned - Spent` (only 24/63 rows match). It is an
+  EveryDollar-computed column whose carryover semantics are not derivable
+  from a single month's exports. Store verbatim; never derive it.
+
+**Transaction Export** — two observed header versions
+
+- v1 (2026-04, 2026-05): `Group, Item, Type, Date, Merchant, Amount, Note`
+- v2 (2026-06 onward): adds `Account` between `Merchant` and `Amount`.
+  Parsers must accept both.
+- `Type` vocabulary: `debt`, `expense`, `fund`, `income` (standard app
+  labels). Amounts are signed: expense/debt rows predominantly negative,
+  income positive, fund mixed. Signed sum semantics reconcile with `Spent`.
+- `Date` is zero-padded `MM/DD/YYYY`. A month's export can contain rows
+  dated in the adjacent prior month (tracked-to != dated-in).
+- No transaction ID column. Exact duplicate rows exist and are
+  indistinguishable from legitimate repeat purchases. Splits appear as
+  multiple rows sharing date+merchant with different amounts/items.
+- `Note` is mostly empty (11/119 populated in sample).
+- Re-exports are cumulative and append-mostly: all 66 rows of a mid-month
+  export were preserved verbatim in the end-month export, with 53 appended.
+  This validates replace-on-reimport.
+- Transaction groups/items are always a subset of the same month's Budget
+  Export vocabulary.
+
+**Not yet observed:** empty exports, duplicate downloads in the same session,
+negative Planned, goals as a distinct Type (only `fund` observed).
 
 ## First CLI surface
 
@@ -89,5 +125,10 @@ Later cuts may add recent transactions, cross-month compare, and unusual-spendin
 ## Open design questions
 
 - What normalized model faithfully represents the observed export schemas?
-  (Blocked on representative same-month Budget Export + Transaction Export
-  inspection; real rows must not become fixtures.)
+  (Unblocked; candidate: mirror the export rows faithfully per budget month
+  rather than inventing entities — store Remaining verbatim, transactions as
+  rows without synthesized IDs.)
+- Can past months' Budget Exports still be downloaded? Transaction-only
+  exports exist for 2026-04 through 2026-06, but a Budget Snapshot is defined
+  as requiring both exports. If past Budget Exports are unavailable, either
+  history starts at 2026-07 or transaction-only months need a defined status.

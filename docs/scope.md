@@ -36,6 +36,7 @@ Every answer based on a snapshot must expose or account for its freshness.
 | Snapshot history | No per-month version history; local state remains a disposable cache |
 | First CLI cut | `import`, `status`, and Budget Item planned/spent/remaining |
 | First-cut non-goals | Transaction listing, cross-month compare, anomaly detection |
+| On-disk location | XDG data home: `~/.local/share/everydollar-reader/` for exports cache and derived state |
 | Public release | Scaffold is public; usable release deferred until synthetic fixtures and privacy checks exist |
 
 ## Explicit non-goals
@@ -50,7 +51,8 @@ Every answer based on a snapshot must expose or account for its freshness.
 
 ## Data-safety rules
 
-1. Real exports and derived databases stay outside git.
+1. Real exports and derived databases stay outside git and live under
+   `~/.local/share/everydollar-reader/` (XDG data home).
 2. Logs contain structural diagnostics, never rows, merchants, category names,
    or amounts.
 3. Tests use synthetic, privacy-reviewed fixtures.
@@ -84,6 +86,5 @@ Later cuts may add recent transactions, cross-month compare, and unusual-spendin
 ## Open design questions
 
 - What normalized model faithfully represents the observed export schemas?
-- Where should real exports and the derived cache live on disk?
 - How is Snapshot Time established on import (export metadata, file mtime, or import time)?
 - What brand-neutral name should be used if the project becomes public?

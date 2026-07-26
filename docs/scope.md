@@ -34,6 +34,8 @@ Every answer based on a snapshot must expose or account for its freshness.
 | MCP surface | Deferred; not required for the first Accountant integration |
 | Revised-month import | Replace the existing snapshot for that month; Snapshot Time advances |
 | Snapshot history | No per-month version history; local state remains a disposable cache |
+| First CLI cut | `import`, `status`, and Budget Item planned/spent/remaining |
+| First-cut non-goals | Transaction listing, cross-month compare, anomaly detection |
 | Public release | Scaffold is public; usable release deferred until synthetic fixtures and privacy checks exist |
 
 ## Explicit non-goals
@@ -69,8 +71,19 @@ month are available for local inspection. Inspection must establish:
 Real rows will not become fixtures. Once the shapes are understood, equivalent
 synthetic fixtures will be authored.
 
+## First CLI surface
+
+| Command | Purpose |
+| --- | --- |
+| `import` | Accept same-month Budget Export + Transaction Export; replace any existing snapshot for that month |
+| `status` | List retained months with Snapshot Time / freshness |
+| item remaining | Report planned, spent, and remaining for a named Budget Item from the latest (or specified) month snapshot |
+
+Later cuts may add recent transactions, cross-month compare, and unusual-spending helpers.
+
 ## Open design questions
 
 - What normalized model faithfully represents the observed export schemas?
-- Which deterministic CLI commands and queries belong in the first cut?
+- Where should real exports and the derived cache live on disk?
+- How is Snapshot Time established on import (export metadata, file mtime, or import time)?
 - What brand-neutral name should be used if the project becomes public?

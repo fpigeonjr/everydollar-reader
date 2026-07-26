@@ -1,6 +1,6 @@
 # Discovery Scope
 
-Status: public scaffold; CLI-first design resolved; schema discovery pending.
+Status: Python CLI skeleton runnable; schema discovery pending before parsers.
 
 ## Goal
 
@@ -39,6 +39,7 @@ Every answer based on a snapshot must expose or account for its freshness.
 | On-disk location | XDG data home: `~/.local/share/everydollar-reader/` for exports cache and derived state |
 | Snapshot Time source | Wall-clock import time when the CLI successfully accepts a month's export pair |
 | Public / package name | Keep `everydollar-reader` for now; revisit only if trademark risk becomes concrete |
+| Implementation language | Python; local CLI package invoked by Hermes via shell |
 | Public release | Scaffold is public; usable release deferred until synthetic fixtures and privacy checks exist |
 
 ## Explicit non-goals
@@ -90,4 +91,3 @@ Later cuts may add recent transactions, cross-month compare, and unusual-spendin
 - What normalized model faithfully represents the observed export schemas?
   (Blocked on representative same-month Budget Export + Transaction Export
   inspection; real rows must not become fixtures.)
-- Implementation language and packaging for the CLI binary.

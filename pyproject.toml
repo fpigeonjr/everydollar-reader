@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "everydollar-reader"
+version = "0.1.0"
+description = "Local read-only CLI for user-exported EveryDollar budget snapshots"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Frank Pigeon" }]
+keywords = ["budget", "cli", "everydollar", "read-only"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "Programming Language :: Python :: 3",
+  "Topic :: Office/Business :: Financial",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+everydollar-reader = "everydollar_reader.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/everydollar_reader"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

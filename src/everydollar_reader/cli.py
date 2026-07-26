@@ -8,6 +8,7 @@ from pathlib import Path
 
 from everydollar_reader import __version__
 from everydollar_reader.paths import data_home, ensure_data_home
+from everydollar_reader.snapshots import load_snapshots
 
 _SCHEMA_GATE = (
     "not implemented: parser work waits on same-month export schema discovery "
@@ -115,7 +116,16 @@ def cmd_import(args: argparse.Namespace) -> int:
 def cmd_status(args: argparse.Namespace) -> int:
     data_dir = _resolve_data_dir(args)
     print(f"data-dir: {data_dir}")
-    print("No budget snapshots imported yet.")
+    snapshots, warnings = load_snapshots(data_dir)
+    for warning in warnings:
+        print(f"warning: {warning}")
+    if not snapshots:
+        print("No budget snapshots imported yet.")
+        return 0
+    print(f"{len(snapshots)} budget snapshot(s):")
+    for snap in snapshots:
+        print(f"  {snap.month}  Snapshot Time: {snap.display_time()}")
+    print("Snapshots are point-in-time; EveryDollar may have changed since.")
     return 0
 
 

@@ -13,8 +13,11 @@ than raised, and never crash a status read.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
+
+_SNAPSHOT_STEM_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 
 
 @dataclass(frozen=True)
@@ -31,10 +34,11 @@ class SnapshotRef:
     def display_time(self) -> str:
         """Render ``snapshot_time`` for humans.
 
-        Accepts any ISO-8601 timestamp; returns the precision provided on disk
-        with the ``T`` date/time separator replaced by a space. Unknown or
-        non-ISO values are returned unchanged so a bad file never crashes a
-        status read.
+        Performs no parsing or validation: the first ``T`` in the stored
+        string (if any) is replaced with a space so an ISO-8601 timestamp
+        reads naturally. Any value is returned through this single
+        substitution, so a malformed ``snapshot_time`` is passed through with
+        only that substitution applied rather than rejected.
         """
         value = self.snapshot_time
         if "T" in value:
@@ -43,7 +47,13 @@ class SnapshotRef:
 
 
 def _is_snapshot_file(path: Path) -> bool:
-    return path.suffix == ".json" and path.stem[:1].isdigit() and "-" in path.stem
+    """True when ``path`` is a snapshot file for a ``YYYY-MM`` budget month.
+
+    Matches the documented storage layout (``<YYYY-MM>.json``) and rejects
+    other ``.json`` files that may share the data directory, so unrelated
+    caches or backups are neither listed nor warned about.
+    """
+    return path.suffix == ".json" and bool(_SNAPSHOT_STEM_RE.match(path.stem))
 
 
 def load_snapshots(data_dir: Path) -> tuple[list[SnapshotRef], list[str]]:

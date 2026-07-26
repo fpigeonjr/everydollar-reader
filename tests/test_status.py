@@ -96,3 +96,25 @@ def test_status_warns_on_unreadable_files_but_still_lists_valid_months(
     assert listed == ["2026-07"]  # only the valid month is listed
     assert "warning" in out  # corruption surfaced, not silently swallowed
     assert "README" not in out  # foreign file ignored, not warned
+
+
+def test_status_ignores_unrelated_json_files_in_the_data_dir(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    _write_snapshot(data_dir, "2026-07", "2026-07-26T14:03:00+00:00")
+    # An unrelated JSON cache that merely shares the data directory — must
+    # not be treated as a snapshot (no warning, no listing).
+    (data_dir / "backup.json").write_text("{}", encoding="utf-8")
+    # A stem that looks close to YYYY-MM but is an invalid month — also
+    # ignored under the documented <YYYY-MM>.json contract.
+    (data_dir / "2026-13.json").write_text("{}", encoding="utf-8")
+
+    assert main(["--data-dir", str(data_dir), "status"]) == 0
+    out = capsys.readouterr().out
+    listed = [ln.split()[0] for ln in out.splitlines() if ln.startswith("  ")]
+    assert listed == ["2026-07"]
+    assert "warning" not in out
+    assert "backup" not in out
+    assert "2026-13" not in out

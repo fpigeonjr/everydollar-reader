@@ -8,6 +8,11 @@ from pathlib import Path
 
 from everydollar_reader import __version__
 from everydollar_reader.paths import data_home, ensure_data_home
+from everydollar_reader.snapshot import (
+    SnapshotImportError,
+    build_snapshot,
+    store_snapshot,
+)
 
 _SCHEMA_GATE = (
     "not implemented: parser work waits on same-month export schema discovery "
@@ -43,6 +48,11 @@ def build_parser() -> argparse.ArgumentParser:
     import_p = sub.add_parser(
         "import",
         help="Import a same-month Budget Export + Transaction Export pair",
+    )
+    import_p.add_argument(
+        "--month",
+        required=True,
+        help="Budget month (YYYY-MM) for the export pair",
     )
     import_p.add_argument(
         "--budget",
@@ -94,22 +104,20 @@ def cmd_import(args: argparse.Namespace) -> int:
     budget = args.budget.expanduser()
     transactions = args.transactions.expanduser()
 
-    missing = [str(p) for p in (budget, transactions) if not p.is_file()]
-    if missing:
-        print(
-            "error: export file(s) not found: " + ", ".join(missing),
-            file=sys.stderr,
-        )
+    try:
+        snapshot = build_snapshot(args.month, budget, transactions)
+        path = store_snapshot(data_dir, snapshot)
+    except SnapshotImportError as exc:
+        print(f"error: {exc}", file=sys.stderr)
         return 2
 
     print(
-        f"data-dir: {data_dir}\n"
-        f"budget: {budget}\n"
-        f"transactions: {transactions}\n"
-        f"error: {_SCHEMA_GATE}",
-        file=sys.stderr,
+        f"imported {args.month}: "
+        f"{len(snapshot['budget']['rows'])} budget rows, "
+        f"{len(snapshot['transactions']['rows'])} transaction rows -> {path}",
+        file=sys.stdout,
     )
-    return 1
+    return 0
 
 
 def cmd_status(args: argparse.Namespace) -> int:

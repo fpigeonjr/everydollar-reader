@@ -30,7 +30,9 @@ Every answer based on a snapshot must expose or account for its freshness.
 | History | Import all available months from January 2026 onward; grow toward a rolling 13 months |
 | Raw-data consumer | Accountant Area Agent only |
 | Isolation strength | Operational profile/tool isolation; no separate OS identity |
-| Public release | Deferred until synthetic fixtures and privacy checks exist |
+| Local interface | CLI-first; Hermes Accountant shells out to the CLI |
+| MCP surface | Deferred; not required for the first Accountant integration |
+| Public release | Scaffold is public; usable release deferred until synthetic fixtures and privacy checks exist |
 
 ## Explicit non-goals
 
@@ -69,6 +71,5 @@ synthetic fixtures will be authored.
 
 - What normalized model faithfully represents the observed export schemas?
 - How should repeated imports of a revised month replace or version a snapshot?
-- Which deterministic queries belong in the first Accountant-facing tool?
-- Should the local interface be a CLI, an MCP server, or both?
+- Which deterministic CLI commands and queries belong in the first cut?
 - What brand-neutral name should be used if the project becomes public?

@@ -45,6 +45,10 @@ _Avoid_: Transaction date, import time
 The Hermes Area Agent that may inspect raw Budget Snapshots and answer finance questions for Frank.
 _Avoid_: Main agent, financial adviser
 
+**Budget Reader CLI**:
+The local command-line interface the Accountant shells out to for import status and read-only budget queries.
+_Avoid_: MCP server, API service, EveryDollar client
+
 ## Relationships
 
 - An **EveryDollar Budget** is the authority for exactly one budget month
@@ -52,7 +56,7 @@ _Avoid_: Main agent, financial adviser
 - A **Budget Snapshot** contains exactly one **Budget Export** and one **Transaction Export**
 - A **Budget Group** contains one or more **Budget Items**
 - A **Tracked Transaction** belongs to one budget month and is assigned to one or more **Budget Items**
-- The **Accountant** may inspect raw **Budget Snapshots**
+- The **Accountant** may inspect raw **Budget Snapshots** through the **Budget Reader CLI**
 
 ## Example dialogue
 

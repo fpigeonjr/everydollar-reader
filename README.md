@@ -1,11 +1,12 @@
 # EveryDollar Reader
 
-EveryDollar Reader is a planned local, read-only tool for querying budget and
+EveryDollar Reader is a planned local, read-only **CLI** for querying budget and
 tracked-transaction data that a user explicitly downloads from EveryDollar.
 Its first consumer will be the Accountant Area Agent in a personal Hermes
-installation.
+installation, which will shell out to this CLI rather than using a dedicated
+MCP server.
 
-The project is in discovery. It does not yet parse exports or provide an API.
+The project is in discovery. It does not yet parse exports or provide commands.
 
 ## Product boundary
 
